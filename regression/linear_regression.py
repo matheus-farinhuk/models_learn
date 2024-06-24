@@ -1,32 +1,31 @@
 import numpy as np
 import inspect
-from .normal import NormalEquation
-from .batchgradient import BatchGradient
+from .models_linear_reg import NormalEquation, BatchGradient, StochasticGradient
+from .tools import DummyColumn, Scaled
 
 class LinearRegression():
-    def __init__(self, model='Normal', scale = False):
+    def __init__(self, model: str='Normal', scale: bool = False, 
+                 learning_schedule=False, epochs=50, eta=0.1):
         self.scale = scale
+        self.learning_schedule = learning_schedule
+        self.epochs = epochs
+        self.eta = eta
         if model == 'Normal':
-            self.model = NormalEquation()
+            self.model = NormalEquation
         elif model == 'BatchGD':
-            self.model = BatchGradient()
-    def fit(self, X, y, **kwargs):
+            self.model = BatchGradient
+        elif model == 'StochasticGD':
+            self.model = StochasticGradient
+        
+    def fit(self, X, y):
         if not isinstance(X, np.ndarray):
             X = np.array(X)
-        self.X = self.Scaled(X) if self.scale == True else X
-        self.X = self.dummy_column(self.X)
-
-        model_fit_params = inspect.signature(self.model.fit).parameters
-        unexpected_params = [k for k in kwargs if k not in model_fit_params]
-        if unexpected_params:
-            raise ValueError(f"Unexpected parameters: {unexpected_params}")
+        self.X = Scaled(X) if self.scale == True else X
+        self.X = DummyColumn(self.X)
         
-        self.theta = self.model.fit(self.X, y, **kwargs)
+        self.theta = self.model(self.X, y, learning_schedule=self.learning_schedule, eta=self.eta,
+                                epochs=self.epochs)
     def prediction(self, X):
-        X = self.dummy_column(X)
+        X = DummyColumn(X)
         self.predict_value = X @ self.theta
         return self.predict_value
-    def dummy_column(self, X):
-        return np.hstack((np.ones((X.shape[0], 1)), X))
-    def Scaled(self, X):
-        return (X - np.mean(X, axis=0)) / np.std(X, axis=0)
