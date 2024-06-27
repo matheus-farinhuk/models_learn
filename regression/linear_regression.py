@@ -1,5 +1,4 @@
 import numpy as np
-import inspect
 from .models_linear_reg import NormalEquation, BatchGradient, StochasticGradient
 from .tools import DummyColumn, Scaled
 
@@ -26,6 +25,7 @@ class LinearRegression():
         self.theta = self.model(self.X, y, learning_schedule=self.learning_schedule, eta=self.eta,
                                 epochs=self.epochs)
     def prediction(self, X):
-        X = DummyColumn(X)
+        self.X = Scaled(X) if self.scale == True else X
+        X = DummyColumn(self.X)
         self.predict_value = X @ self.theta
         return self.predict_value

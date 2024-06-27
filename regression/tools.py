@@ -7,3 +7,6 @@ def Scaled(X):
 
 def LearningSchedule(t, t0, t1):
     return t0 / (t + t1)
+
+def mean_squared_error(y_pred, y, squared = True):
+    return 1/len(y) * np.sum((y_pred - y)**2) if squared else 1/len(y) * np.sum((y_pred - y))
