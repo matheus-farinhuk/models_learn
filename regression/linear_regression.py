@@ -4,7 +4,8 @@ from .tools import DummyColumn, Scaled
 
 class LinearRegression():
     def __init__(self, model: str='Normal', scale: bool = False, 
-                 learning_schedule=False, epochs=50, eta=0.1):
+                 learning_schedule=False, epochs=50, eta=0.1, batch_size = 1):
+        self.batch_size = batch_size
         self.scale = scale
         self.learning_schedule = learning_schedule
         self.epochs = epochs
@@ -23,7 +24,7 @@ class LinearRegression():
         self.X = DummyColumn(self.X)
         
         self.theta = self.model(self.X, y, learning_schedule=self.learning_schedule, eta=self.eta,
-                                epochs=self.epochs)
+                                epochs=self.epochs, batch_size = self.batch_size)
     def prediction(self, X):
         self.X = Scaled(X) if self.scale == True else X
         X = DummyColumn(self.X)

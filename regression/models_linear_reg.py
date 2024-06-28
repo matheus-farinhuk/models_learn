@@ -1,5 +1,5 @@
 import numpy as np
-from .tools import LearningSchedule, mean_squared_error
+from .tools import LearningSchedule
 
 
 
@@ -16,38 +16,32 @@ def BatchGradient(X, y, eta, epochs, **kwarg):
         theta -= eta * gradient
     return theta
 
-def StochasticGradient(X, y, eta, epochs, learning_schedule, tol, early_stop, iteration_no_change,
-                        **kwarg):
+def StochasticGradient(X, y, eta, epochs, learning_schedule,
+                        batch_size, **kwarg):
     if learning_schedule:
         try:
-            t0, t1 = (learning_schedule)
-        except(TypeError, ValueError) as e:
+            t0, t1 = learning_schedule  
+        except (TypeError, ValueError) as e:  # Added space
             print(f'{e} \nlearning_schedule expect a tuple of (t0, t1)')
-    m = len(X)
-    iteration_no_change_value = 0
-    best_loss = float('inf')
-    last_loss = float('inf')
+            return 
+    m = X.shape[0]
+
     theta = np.zeros((X.shape[1], 1))
+    
     for epoch in range(epochs):
-        for iteration in range(m):
-            idx = np.random.randint(m)
-            xi = X[idx : idx + 1]
-            yi = y[idx : idx + 1]
+        indices = np.random.permutation(m)  
+        X_shuffled = X[indices]  
+        y_shuffled = y[indices]  
+        
+        for iteration in range(0, m, batch_size):
+            xi = X_shuffled[iteration:iteration+batch_size]  
+            yi = y_shuffled[iteration:iteration+batch_size]  
             predict = xi @ theta
-            loss = mean_squared_error(predict, y, squared=False)
             gradient = 2 * xi.T @ (predict - yi)
-            eta = LearningSchedule(epoch * m + iteration, t0, t1) if learning_schedule else eta
-            theta -= eta * gradient
-            if loss < best_loss:
-                best_loss = loss
-            if early_stop and last_loss == loss:
-                iteration_no_change_value += 1
-                print(iteration_no_change_value)
-                if iteration_no_change_value >= iteration_no_change and loss > best_loss - tol:
-                    return theta
-            else:
-                iteration_no_change_value = 0
-            last_loss = loss
+            if learning_schedule:  
+                eta = LearningSchedule(epoch * m + iteration, t0, t1)
+            theta -= eta * gradient  
+    
     return theta
 
 
