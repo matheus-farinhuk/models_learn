@@ -1,5 +1,5 @@
 import numpy as np
-from .tools import sigma
+from .classification_fuctions import sigma
 
 def binary_logisc_reg(X, y, epochs, eta):
     m = len(X)

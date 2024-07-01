@@ -1,6 +1,6 @@
 import numpy as np
 from .models_linear_reg import NormalEquation, BatchGradient, StochasticGradient
-from .tools import DummyColumn, Scaled
+from tools.tools import DummyColumn, Scaled, type_shape
 
 class LinearRegression():
     def __init__(self, model: str='Normal', scale: bool = False, 
@@ -18,16 +18,15 @@ class LinearRegression():
             self.model = StochasticGradient
         
     def fit(self, X, y):
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-        self.X = Scaled(X) if self.scale == True else X
-        self.X = DummyColumn(self.X)
+        X, y = type_shape(X, y)
+        X = Scaled(X) if self.scale == True else X
+        X = DummyColumn(X)
         
-        self.theta = self.model(self.X, y, learning_schedule=self.learning_schedule, eta=self.eta,
+        self.theta = self.model(X, y, learning_schedule=self.learning_schedule, eta=self.eta,
                                 epochs=self.epochs, batch_size = self.batch_size)
         return self.theta
     def prediction(self, X):
-        self.X = Scaled(X) if self.scale == True else X
-        X = DummyColumn(self.X)
+        X = Scaled(X) if self.scale == True else X
+        X = DummyColumn(X)
         self.predict_value = X @ self.theta
         return self.predict_value
