@@ -25,6 +25,7 @@ class LinearRegression():
         
         self.theta = self.model(self.X, y, learning_schedule=self.learning_schedule, eta=self.eta,
                                 epochs=self.epochs, batch_size = self.batch_size)
+        return self.theta
     def prediction(self, X):
         self.X = Scaled(X) if self.scale == True else X
         X = DummyColumn(self.X)
